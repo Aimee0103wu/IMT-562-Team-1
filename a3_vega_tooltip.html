@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IMT562 | Assignment3</title>
+    <meta charset="utf-8" />
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.9.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.2.2"></script>
+
+    <style media="screen">
+      /* Add space between Vega-Embed links  */
+      .vega-actions a {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>IMT562 | Assignment 3: Stock Price Analysis</h1>
+    <!-- Container for the visualization -->
+    <div id="vis"></div>
+
+    <script>
+      // Assign the specification to a local variable vlSpec.
+      var stock = {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+                "data": {"url": "https://raw.githubusercontent.com/Aimee0103wu/IMT-562-Team-1/master/Data/stocks_combined_vega.csv"},
+                "vconcat":[
+                  {
+                  "width": 800,
+                  "height": 400,
+                  "encoding": {
+                    "x": {"field": "Date", "type": "temporal", "scale": {"domain": {"selection": "brush"}}, "axis": {"title": ""}}},
+                  "layer": [
+                    {
+                      "mark":"rule",
+                      "encoding": {
+                        "x": {"field": "Date", "type": "temporal"},
+                        "y": {"field": "Close Price", "type": "quantitative"},
+                        "color": {"field": "Stock", "type": "nominal"}
+                      },
+                      
+                      "layer": [
+                        {"mark": "line"},
+                        {"transform": [{"filter": {"selection": "hover"}}], "mark": "point"}
+                      ]
+                    },
+                    {
+                      "transform": [{"pivot": "Stock", "value": "Close Price", "groupby": ["Date"]}],
+                      "mark": "rule",
+                      "encoding": {
+                        "opacity": {
+                          "condition": {"value": 0.3, "selection": "hover"},
+                          "value": 0
+                        },
+                        "tooltip": [
+                          {"field": "MSFT", "type": "quantitative"},
+                          {"field": "AMZN", "type": "quantitative"},
+                          {"field": "COST", "type": "quantitative"},
+                          {"field": "ALK", "type": "quantitative"},
+                          {"field": "SBUX", "type": "quantitative"}
+                        ]
+                      },
+                      "selection": {
+                        "hover": {
+                          "type": "single",
+                          "fields": ["Date"],
+                          "nearest": true,
+                          "on": "mouseover",
+                          "empty": "none",
+                          "clear": "mouseout"
+                        }
+                      }
+                    }
+                  ]},
+                  {
+                    "width": 800,
+                    "height": 60,
+                    "mark": "line",
+                    "selection": {
+                      "brush": {"type": "interval", "encodings": ["x"]}
+                    },
+                    "encoding": {
+                      "x": {
+                        "field": "Date",
+                        "type": "temporal"
+                      },
+                      "y": {
+                        "field": "Close Price",
+                        "type": "quantitative",
+                        "axis": {"tickCount": 3, "grid": false}
+                      },
+                      "color": {"value": "#b5b5b5"}
+                    }
+                  }]
+                };
+
+      // Embed the visualization in the container with id `vis`
+      vegaEmbed('#vis', stock);
+    </script>
+  </body>
+</html>
+
+
+
+
