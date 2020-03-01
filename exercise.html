@@ -84,7 +84,7 @@
             
             var x = d3.scalePoint()
                         .domain(["","North America", "South America", "West Africa", "South Asia",  "Southeast Asia", "East Asia", "Oceania", ""])
-                        .range([0, width]);
+                        .range([0, width-30]);
             svg.append("g")
                 .attr("transform", "translate(0," + height + ")")
                 .call(d3.axisBottom(x));
@@ -92,7 +92,7 @@
             var y = d3.scaleLinear()
                         .domain([
                             d3.min(dataset, function(d) { return d.TNPP; }),
-							d3.max(dataset, function(d) { return d.TNPP; })
+							d3.max(dataset, function(d) { return d.TNPP; })+10
                         ])
                         .range([height, 0]);
             svg.append("g")
