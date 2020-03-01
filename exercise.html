@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+        <style type="text/css">
+
+            circle:hover{
+                opacity: 1;
+                box-shadow: 10px 10px 5px #aaaaaa;
+            }
+
+            #tooltip{
+                        position: absolute;
+                        width: 200px;
+                        height: auto;
+                        padding: 10px;
+                        background-color: white;
+                        -webkit-border-radius: 10px;
+                        -moz-border-radius:10px;
+                        border-radius: 10px;
+                        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                        pointer-events: none;
+                    }
+
+                    #tooltip.hidden{
+                        display: none;
+                    }
+
+                    #tooltip p{
+                        margin: 0;
+                        font-family: sans-serif;
+                        font-size: 16px;
+                        line-height: 20px;
+                    }
+        </style>
+    </head>
+    <body>
+        <h1> Team 1 </h1>
+        <div id="tooltip" class="hidden">
+            <p><strong>Important Label Heading</strong></p>
+            <p><span id="value">100</span></p>
+        </div>
+        <script type="text/javascript">
+        var margin = {top: 10, right: 10, bottom: 20, left: 50}
+            width = 1000,
+            height = 580;
+
+        var dataset, x, y, xAxis, yAxis;
+
+        var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left+ "," +margin.top+")");
+
+        d3.csv("forest.csv", function(error, data){
+            
+            if (error) throw error;
+
+            data.forEach(function(d) {
+					d.forest = d.CountryandLocation,  
+					d.type = d.ForestType, 
+					d.age = d.SandAge,
+					d.elevm = +parseFloat(d.Elevm),
+					d.soil_type = d.SoilType,
+					d.soil_order_code = +parseFloat(d.SoilOrderCode),
+                    d.soil_texture_code = +parseFloat(d.SoilTextureCode),
+                    d.Precipmm = +parseFloat(d.Precipmm),
+                    d.Percip_group = d.PercipGroup,
+                    d.percip_code = +parseFloat(d.PercipCode),
+                    d.AirTempMean = +parseFloat(d.AirTempMean),
+                    d.AirTempMin = +parseFloat(d.AirTempMin),
+                    d.AirTempMax = +parseFloat(d.AirTempMax),
+                    d.TNPP = +parseFloat(d.TNPP),
+                    d.continent = d.Continent
+				});
+
+            dataset = data;
+            
+            var x = d3.scalePoint()
+                        .domain(["","North America", "South America", "West Africa", "South Asia",  "Southeast Asia", "East Asia", "Oceania", ""])
+                        .range([0, width]);
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+            
+            var y = d3.scaleLinear()
+                        .domain([
+                            d3.min(dataset, function(d) { return d.TNPP; }),
+							d3.max(dataset, function(d) { return d.TNPP; })
+                        ])
+                        .range([height, 0]);
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            var z = d3.scaleLinear()
+                        .domain([
+                            d3.min(dataset, function(d) { return d.TNPP; }),
+							d3.max(dataset, function(d) { return d.TNPP; })
+                        ])
+                        .range([5, 35]);
+
+            var myColor = d3.scaleOrdinal()
+                           .domain(["East Asia", "South Asia", "Southeast Asia", "North America", "South America","Oceania", "West Africa"])
+                           .range(d3.schemeSet2);
+            
+            svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d){return x(d.continent);})
+            .attr("cy", function(d){return y(d.TNPP);})
+            .attr("r", function(d){return z(d.TNPP);})
+            .style("fill", function(d){return myColor(d.continent);})
+            .style("opacity", "0.7")
+            .attr("stroke", "white")
+            .style("stroke-width", "2px")
+            .on("mouseover", function(d){
+
+                    var xPosition = parseFloat(d3.select(this).attr("x"));
+                    var yPosition = parseFloat(d3.select(this).attr("y"));
+
+                    d3.select("#tooltip")
+                        .style("left", xPosition + "px")
+                        .style("top", yPosition + "px")
+                        .select("#value")
+                        .text(d.forest)
+                        .text(d.Precipmm)
+                        .text(d.AirTempMean)
+                        .text(d.TNPP);
+
+                    d3.select("#tooltip").classed("hidden", false);
+                })
+                .on("mouseout", function(){
+                    
+                    d3.select("#tooltip").classed("hidden", true);
+                })
+        })
+        </script>
+    </body>
+</html>
